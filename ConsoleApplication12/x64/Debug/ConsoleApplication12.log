@@ -1,0 +1,8 @@
+﻿  ConsoleApplication12.cpp
+C:\Users\ac\source\repos\ConsoleApplication12\ConsoleApplication12\ConsoleApplication12.cpp(23,56): warning C4267: 'initializing': conversion from 'size_t' to 'unsigned int', possible loss of data
+C:\Users\ac\source\repos\ConsoleApplication12\ConsoleApplication12\ConsoleApplication12.cpp(35,57): warning C4267: 'initializing': conversion from 'size_t' to 'unsigned int', possible loss of data
+C:\Users\ac\source\repos\ConsoleApplication12\ConsoleApplication12\ConsoleApplication12.cpp(47,41): warning C4267: 'initializing': conversion from 'size_t' to 'unsigned int', possible loss of data
+C:\Users\ac\source\repos\ConsoleApplication12\ConsoleApplication12\ConsoleApplication12.cpp(56,55): warning C4267: 'initializing': conversion from 'size_t' to 'unsigned int', possible loss of data
+C:\Users\ac\source\repos\ConsoleApplication12\ConsoleApplication12\ConsoleApplication12.cpp(59,61): warning C4267: 'initializing': conversion from 'size_t' to 'unsigned int', possible loss of data
+C:\Users\ac\source\repos\ConsoleApplication12\ConsoleApplication12\ConsoleApplication12.cpp(78,22): warning C4018: '<': signed/unsigned mismatch
+  ConsoleApplication12.vcxproj -> C:\Users\ac\source\repos\ConsoleApplication12\x64\Debug\ConsoleApplication12.exe
